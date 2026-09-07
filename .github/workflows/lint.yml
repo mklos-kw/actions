@@ -1,0 +1,36 @@
+name: Lint
+
+# Validates this repository's own workflows and the metadata of every action it
+# ships. Note how actionlint sees action.yml files: it reads the metadata of a
+# LOCAL action only when a workflow references it as `uses: ./<folder>`, and it
+# does not check a composite action's `steps:` at all. So every action added here
+# must be referenced by a self-test workflow, or it goes unvalidated.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Lint workflows and action metadata
+        uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2.2.0
+        with:
+          # Pinned rather than `latest` so a new actionlint release cannot turn CI
+          # red without a change in this repository.
+          version: 1.7.12
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Lint YAML
+        run: yamllint .

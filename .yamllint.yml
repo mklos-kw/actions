@@ -1,0 +1,16 @@
+extends: default
+rules:
+  # Workflow files carry `uses: owner/repo@<40-char-sha> # vX.Y.Z` lines, which
+  # cannot fit in 80 columns and must not be wrapped.
+  line-length: disable
+  # None of the YAML here uses the `---` document-start marker; yamllint's default
+  # warns on every file, which is pure noise as PR annotations.
+  document-start: disable
+  # The SHA-pin convention across the org is a single space before the version
+  # comment (`@<sha> # v1.2.3`); yamllint's default wants two.
+  comments:
+    min-spaces-from-content: 1
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no']
+    # `on:` is a mandatory workflow key, not a boolean the author chose.
+    check-keys: false

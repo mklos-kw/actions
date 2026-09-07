@@ -1,0 +1,14 @@
+name: Commits
+
+# The default branch is squash-merged, so the PR title becomes the commit message:
+# this is what keeps it in Conventional Commits format. Delegated to the org's
+# reusable workflow so the rule stays identical across ownCloud repositories.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  commits:
+    uses: owncloud/reusable-workflows/.github/workflows/semantic-git-message.yml@main
