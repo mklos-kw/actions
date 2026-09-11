@@ -42,7 +42,11 @@ include the folder.
 
 | Action | Reference | Purpose |
 |---|---|---|
-| _none yet_ | | The first actions land with the migration of the oCIS CI actions ([owncloud/admin#218](https://github.com/owncloud/admin/issues/218)). |
+| `ocis-setup` | `uses: owncloud/actions/ocis-setup@v1` | Install an oCIS binary (release or pre-built) and start an instance with optional services — antivirus, email, full-text search, Keycloak IDP, WOPI collaboration apps. |
+| `ocis-test` | `uses: owncloud/actions/ocis-test@v1` | Run oCIS Behat acceptance suites, litmus WebDAV tests, cs3api validator, or WOPI validator tests against a running instance. |
+
+These actions were migrated from `mklos-kw/ocis-github-actions`
+([owncloud/admin#218](https://github.com/owncloud/admin/issues/218)).
 
 ## Versioning
 
