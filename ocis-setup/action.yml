@@ -231,8 +231,14 @@ runs:
           -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'
         chmod -R 777 keycloak-certs
 
-        # Patch realm file: replace placeholder domain with actual oCIS URL
-        sed "s|https://ocis-server:9200|${OCIS_URL}|g" "${REALM_DIST}" > /tmp/ocis-realm.json
+        # Patch realm file: replace placeholder domains with the actual oCIS URL.
+        # Realm dist files use either the Docker Compose hostname (ocis-server:9200)
+        # or localhost:9200 for their client redirect URIs; rewrite both so the
+        # imported realm matches wherever oCIS is actually served (e.g. 127.0.0.1:9200
+        # for e2e). Rewriting localhost is a no-op when OCIS_URL is already localhost.
+        sed -e "s|https://ocis-server:9200|${OCIS_URL}|g" \
+            -e "s|https://localhost:9200|${OCIS_URL}|g" \
+            "${REALM_DIST}" > /tmp/ocis-realm.json
 
         timeout 30 bash -c 'until docker exec postgres pg_isready -U keycloak; do sleep 1; done'
 
