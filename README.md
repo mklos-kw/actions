@@ -34,9 +34,9 @@ jobs:
           # action-specific inputs
 ```
 
-There is deliberately **no action at the repository root**: this repository is a
-collection, not a single action. `uses: owncloud/actions@v1` is not valid — always
-include the folder.
+The repository root `action.yml` is a guard, not a usable action: this repository is
+a collection, not a single action. `uses: owncloud/actions@v1` fails with an error
+pointing you at the right folder — always include it.
 
 ## Available Actions
 
