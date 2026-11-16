@@ -311,7 +311,7 @@ runs:
       uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
       with:
         path: /opt/libcurl
-        key: libcurl-8.12.0-${{ runner.os }}
+        key: libcurl-8.12.0-${{ runner.os }}-${{ runner.arch }}-${{ env.ImageVersion }}
 
     - name: Install libcurl 8.12.0 build dependencies
       if: inputs.skip-test-runner-setup != 'true' && steps.cache-libcurl.outputs.cache-hit != 'true'
