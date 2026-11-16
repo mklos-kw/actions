@@ -161,6 +161,7 @@ runs:
       shell: bash
       env:
         OCIS_VERSION: ${{ inputs.ocis-version }}
+        GITHUB_TOKEN: ${{ github.token }}
       run: ${{ github.action_path }}/scripts/install-ocis.sh
 
     - name: Use pre-built oCIS binary
@@ -187,6 +188,7 @@ runs:
       shell: bash
       env:
         OCIS_VERSION: ${{ inputs.ocis-version }}
+        GITHUB_TOKEN: ${{ github.token }}
       run: ${{ github.action_path }}/scripts/install-wrapper.sh
 
     - name: Build ociswrapper from local source (when using pre-built binary)

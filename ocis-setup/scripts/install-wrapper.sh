@@ -9,8 +9,10 @@ if [[ "$VERSION" == "latest" ]]; then
   if [[ -f /tmp/ocis-resolved-version ]]; then
     VERSION=$(cat /tmp/ocis-resolved-version)
   else
-    VERSION=$(curl -s https://api.github.com/repos/owncloud/ocis/releases/latest \
-      | python3 -c "import sys,json; print(json.load(sys.stdin)['tag_name'].lstrip('v'))")
+    AUTH_HEADER=()
+    [[ -n "${GITHUB_TOKEN:-}" ]] && AUTH_HEADER=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
+    VERSION=$(curl -sf "${AUTH_HEADER[@]}" https://api.github.com/repos/owncloud/ocis/releases/latest \
+      | jq -r '.tag_name | ltrimstr("v")')
   fi
 fi
 

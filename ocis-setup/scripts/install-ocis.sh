@@ -5,8 +5,10 @@ set -euo pipefail
 VERSION="${OCIS_VERSION:-latest}"
 
 if [[ "$VERSION" == "latest" ]]; then
-  VERSION=$(curl -s https://api.github.com/repos/owncloud/ocis/releases/latest \
-    | python3 -c "import sys,json; print(json.load(sys.stdin)['tag_name'].lstrip('v'))")
+  AUTH_HEADER=()
+  [[ -n "${GITHUB_TOKEN:-}" ]] && AUTH_HEADER=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
+  VERSION=$(curl -sf "${AUTH_HEADER[@]}" https://api.github.com/repos/owncloud/ocis/releases/latest \
+    | jq -r '.tag_name | ltrimstr("v")')
 fi
 
 # Write resolved version so install-wrapper.sh uses the same tag without a second API call.
