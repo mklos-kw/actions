@@ -535,7 +535,8 @@ runs:
       env:
         OCIS_CONFIG_DIR: ${{ inputs.ocis-config-dir }}
       run: |
-        CERT="${OCIS_CONFIG_DIR:-${HOME}/.ocis/config}/../proxy/server.crt"
+        BASE_DATA_PATH="$(dirname "${OCIS_CONFIG_DIR:-${HOME}/.ocis/config}")"
+        CERT="${BASE_DATA_PATH}/proxy/server.crt"
         if [[ -f "$CERT" ]]; then
           sudo cp "$CERT" /usr/local/share/ca-certificates/ocis.crt
           sudo update-ca-certificates

@@ -19,6 +19,7 @@ echo "{\"defaultFont\": \"${FONT_PATH}\"}" > "$FONTMAP"
 declare -A SERVER_ENV=(
   [OCIS_URL]="$OCIS_URL"
   [OCIS_CONFIG_DIR]="$CONFIG_DIR"
+  [OCIS_BASE_DATA_PATH]="$(dirname "$CONFIG_DIR")"
   [STORAGE_USERS_DRIVER]="ocis"
   [PROXY_ENABLE_BASIC_AUTH]="true"
   [OCIS_LOG_LEVEL]="${LOG_LEVEL:-error}"

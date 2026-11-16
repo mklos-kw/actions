@@ -4,7 +4,10 @@ set -euo pipefail
 CONFIG_DIR="${OCIS_CONFIG_DIR_INPUT:-${HOME}/.ocis/config}"
 mkdir -p "$CONFIG_DIR"
 
-OCIS_URL="${OCIS_URL:-https://localhost:9200}" OCIS_CONFIG_DIR="$CONFIG_DIR" ocis init --insecure true
+OCIS_URL="${OCIS_URL:-https://localhost:9200}" \
+  OCIS_CONFIG_DIR="$CONFIG_DIR" \
+  OCIS_BASE_DATA_PATH="$(dirname "$CONFIG_DIR")" \
+  ocis init --insecure true
 
 if [[ -n "${APP_REGISTRY_FILE_INPUT:-}" ]]; then
   cp "${GITHUB_WORKSPACE}/${APP_REGISTRY_FILE_INPUT}" "${CONFIG_DIR}/app-registry.yaml"
