@@ -210,13 +210,16 @@ runs:
       working-directory: ${{ github.workspace }}
       env:
         ACCEPTANCE_TEST_TYPE: ${{ inputs.acceptance-test-type }}
+        WITH_REMOTE_PHP: ${{ inputs.with-remote-php }}
       run: |
         if [[ "$ACCEPTANCE_TEST_TYPE" == "core-api" ]]; then
           cp tests/acceptance/expected-failures-API-on-OCIS-storage.md /tmp/expected-failures-auto.md
         else
-          cat tests/acceptance/expected-failures-localAPI-on-OCIS-storage.md \
-              tests/acceptance/expected-failures-without-remotephp.md \
-              > /tmp/expected-failures-auto.md
+          cp tests/acceptance/expected-failures-localAPI-on-OCIS-storage.md /tmp/expected-failures-auto.md
+        fi
+        # merge expected-failures-without-remotephp.md only when not using remote.php
+        if [[ "${WITH_REMOTE_PHP:-false}" != "true" ]]; then
+          cat tests/acceptance/expected-failures-without-remotephp.md >> /tmp/expected-failures-auto.md
         fi
         echo "EXPECTED_FAILURES_AUTO=/tmp/expected-failures-auto.md" >> "$GITHUB_ENV"
 
