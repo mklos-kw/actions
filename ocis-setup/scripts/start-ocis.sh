@@ -164,10 +164,7 @@ fi
 
 DIRECT_MODE=false
 if [[ "${KEYCLOAK_ENABLED:-false}" == "true" ]]; then
-  # Only force direct mode when wrapper is not explicitly requested
-  if [[ "${WRAPPER_ENABLED:-true}" != "true" ]]; then
-    DIRECT_MODE=true
-  fi
+  DIRECT_MODE=true
   SERVER_ENV[OCIS_EXCLUDE_RUN_SERVICES]="idp"
   SERVER_ENV[IDM_CREATE_DEMO_USERS]="false"
   SERVER_ENV[PROXY_AUTOPROVISION_ACCOUNTS]="true"
