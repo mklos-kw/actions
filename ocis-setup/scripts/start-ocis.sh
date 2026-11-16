@@ -66,7 +66,6 @@ declare -A SERVER_ENV=(
   [STORAGE_SYSTEM_HTTP_ADDR]="0.0.0.0:9216"
   [STORAGE_USERS_HTTP_ADDR]="0.0.0.0:9158"
   [THUMBNAILS_HTTP_ADDR]="0.0.0.0:9190"
-  [THUMBNAILS_DATA_ENDPOINT]="http://127.0.0.1:9190/thumbnails/data"
   [USERLOG_HTTP_ADDR]="0.0.0.0:9211"
   [WEB_HTTP_ADDR]="0.0.0.0:9100"
   [WEBDAV_HTTP_ADDR]="0.0.0.0:9115"
@@ -144,16 +143,24 @@ fi
 # Shift all service ports by an offset (used when running a secondary oCIS instance alongside the primary)
 if [[ -n "${DEBUG_PORT_OFFSET:-}" && "${DEBUG_PORT_OFFSET}" != "0" ]]; then
   for key in "${!SERVER_ENV[@]}"; do
-    [[ "$key" != *_ADDR && "$key" != *_ADDRESS ]] && continue
     val="${SERVER_ENV[$key]}"
-    # Only shift host:port values (must contain a colon with a numeric port after it)
-    [[ "$val" != *:* ]] && continue
-    port="${val##*:}"
-    [[ "$port" =~ ^[0-9]+$ ]] || continue
-    host="${val%:*}"
-    SERVER_ENV[$key]="${host}:$((port + DEBUG_PORT_OFFSET))"
+    if [[ "$key" == *_ADDR || "$key" == *_ADDRESS ]]; then
+      # Only shift host:port values (must contain a colon with a numeric port after it)
+      [[ "$val" != *:* ]] && continue
+      port="${val##*:}"
+      [[ "$port" =~ ^[0-9]+$ ]] || continue
+      host="${val%:*}"
+      SERVER_ENV[$key]="${host}:$((port + DEBUG_PORT_OFFSET))"
+    elif [[ "$key" == *_PORT && "$val" =~ ^[0-9]+$ ]]; then
+      SERVER_ENV[$key]=$((val + DEBUG_PORT_OFFSET))
+    fi
   done
 fi
+
+# Derive endpoints from their (possibly offset-shifted) addresses rather than hardcoding them
+SERVER_ENV[THUMBNAILS_DATA_ENDPOINT]="http://127.0.0.1:${SERVER_ENV[THUMBNAILS_HTTP_ADDR]##*:}/thumbnails/data"
+# OCIS_LDAP_URI fans out to graph/groups/auth-basic/users/idp (each reads OCIS_LDAP_URI;<SVC>_LDAP_URI)
+SERVER_ENV[OCIS_LDAP_URI]="ldaps://localhost:${SERVER_ENV[IDM_LDAPS_ADDR]##*:}"
 
 # Extra env vars from JSON input — jq outputs KEY\x01VALUE lines (SOH as delimiter: safe against spaces/newlines in values)
 if [[ -n "${EXTRA_SERVER_ENV:-}" && "${EXTRA_SERVER_ENV}" != "{}" ]]; then
@@ -195,12 +202,15 @@ if [[ "$DIRECT_MODE" == "true" ]]; then
   echo "Starting oCIS server (direct mode)..."
   env "${ENV_ARGS[@]}" ocis server > "$LOG_FILE" 2>&1 &
 else
-  echo "Starting ociswrapper + oCIS server..."
+  WRAPPER_PORT=$((${DEBUG_PORT_OFFSET:-0} + 5200))
+  echo "WRAPPER_PORT=${WRAPPER_PORT}" >> "$GITHUB_ENV"
+  echo "Starting ociswrapper + oCIS server on port ${WRAPPER_PORT}..."
   env "${ENV_ARGS[@]}" ociswrapper serve \
     --bin /usr/local/bin/ocis \
     --url "$OCIS_URL" \
     --admin-username admin \
     --admin-password "${ADMIN_PASSWORD:-admin}" \
+    --port "$WRAPPER_PORT" \
     > "$LOG_FILE" 2>&1 &
 fi
 

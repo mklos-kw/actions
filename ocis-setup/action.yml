@@ -119,6 +119,9 @@ outputs:
   wopi-url:
     description: WOPI source base URL (http://localhost:PORT); only set when collaboration-apps is non-empty
     value: ${{ steps.wopi-url.outputs.wopi-url }}
+  wrapper-url:
+    description: ociswrapper base URL (http://localhost:PORT), accounting for debug-port-offset; only set when wrapper=true and keycloak=false
+    value: ${{ steps.wrapper-url.outputs.wrapper-url }}
   keycloak-domain:
     description: Keycloak domain (host:port); only set when keycloak=true
     value: localhost:8443
@@ -489,6 +492,14 @@ runs:
         LOG_FILE: ${{ inputs.log-file }}
         DEBUG_PORT_OFFSET: ${{ inputs.debug-port-offset }}
       run: ${{ github.action_path }}/scripts/start-ocis.sh
+
+    - name: Set wrapper-url output
+      id: wrapper-url
+      if: inputs.wrapper != 'false' && inputs.keycloak != 'true'
+      shell: bash
+      env:
+        WRAPPER_PORT: ${{ env.WRAPPER_PORT }}
+      run: echo "wrapper-url=http://localhost:${WRAPPER_PORT:-5200}" >> "$GITHUB_OUTPUT"
 
     # -------------------------------------------------------------------------
     # 10. Wait for oCIS to be healthy
