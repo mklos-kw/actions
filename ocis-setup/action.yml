@@ -23,10 +23,6 @@ inputs:
     description: Artifact name to download ociswrapper from (downloads to /usr/local/bin/ociswrapper)
     required: false
     default: ""
-  admin-password:
-    description: Admin user password
-    required: false
-    default: admin
   log-level:
     description: oCIS log level
     required: false
@@ -476,7 +472,6 @@ runs:
     - name: Start oCIS
       shell: bash
       env:
-        ADMIN_PASSWORD: ${{ inputs.admin-password }}
         LOG_LEVEL: ${{ inputs.log-level }}
         DEMO_USERS: ${{ inputs.demo-users }}
         ANTIVIRUS_ENABLED: ${{ inputs.antivirus }}
@@ -521,7 +516,7 @@ runs:
           ' || (echo "=== oCIS failed to start ===" && cat "${LOG_FILE}" 2>/dev/null | tail -50 && exit 1)
         else
           timeout 300 bash -c '
-            until curl -sk -uadmin:admin "${OCIS_URL}/graph/v1.0/users/admin" \
+            until curl -sk -u"${ADMIN_LOGIN}:${ADMIN_PASSWORD}" "${OCIS_URL}/graph/v1.0/users/admin" \
                   -w "%{http_code}" -o /dev/null 2>/dev/null | grep -q "200"; do
               sleep 2
             done

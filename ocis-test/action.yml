@@ -39,8 +39,9 @@ runs:
       env:
         OCIS_URL: ${{ inputs.ocis-url }}
       run: |
+        # ADMIN_LOGIN / ADMIN_PASSWORD are exported by ocis-setup
         # Get admin personal space ID
-        SPACE_ID=$(curl -sk -uadmin:admin "${OCIS_URL}/graph/v1.0/me/drives" \
+        SPACE_ID=$(curl -sk -u"${ADMIN_LOGIN}:${ADMIN_PASSWORD}" "${OCIS_URL}/graph/v1.0/me/drives" \
           | jq -r '.value[] | select(.driveType=="personal") | .root.webDavUrl | split("/") | last')
         echo "LITMUS_SPACE_ID=${SPACE_ID}" >> "$GITHUB_ENV"
         echo "Space ID: ${SPACE_ID}"
@@ -55,7 +56,7 @@ runs:
           -d "path=/litmus_folder&shareType=0&permissions=15&name=litmus_folder&shareWith=admin")
         SHARE_ID=$(echo "$SHARE_RESP" | grep -oP '(?<=<id>)[^<]+' | head -1)
         if [[ -n "$SHARE_ID" ]]; then
-          curl -X POST -sk -uadmin:admin \
+          curl -X POST -sk -u"${ADMIN_LOGIN}:${ADMIN_PASSWORD}" \
             "${OCIS_URL}/ocs/v2.php/apps/files_sharing/api/v1/shares/pending/${SHARE_ID}" \
             > /dev/null
           echo "Share accepted (ID: ${SHARE_ID})"
@@ -85,8 +86,8 @@ runs:
           echo "=== litmus [${name}]: ${endpoint} ==="
           docker run --rm \
             -e "LITMUS_URL=${endpoint}" \
-            -e LITMUS_USERNAME=admin \
-            -e LITMUS_PASSWORD=admin \
+            -e "LITMUS_USERNAME=${ADMIN_LOGIN}" \
+            -e "LITMUS_PASSWORD=${ADMIN_PASSWORD}" \
             -e "TESTS=basic copymove props http" \
             "$LITMUS_IMAGE" || FAILED+=("$name")
         }
@@ -126,8 +127,9 @@ runs:
         OCIS_URL: ${{ inputs.ocis-url }}
         SUITE: ${{ inputs.suite }}
       run: |
+        # ADMIN_LOGIN / ADMIN_PASSWORD are exported by ocis-setup
         # Upload test file; capture response headers for file ID
-        curl -sk -uadmin:admin -X PUT \
+        curl -sk -u"${ADMIN_LOGIN}:${ADMIN_PASSWORD}" -X PUT \
           --fail --retry-connrefused --retry 7 --retry-all-errors \
           "${OCIS_URL}/remote.php/webdav/test.wopitest" \
           -D /tmp/wopi-headers.txt
@@ -137,7 +139,7 @@ runs:
 
         FILE_ID_ENC=$(jq -rn --arg v "$FILE_ID" '$v | @uri')
 
-        OPEN=$(curl -sk -uadmin:admin -X POST --fail \
+        OPEN=$(curl -sk -u"${ADMIN_LOGIN}:${ADMIN_PASSWORD}" -X POST --fail \
           --retry-connrefused --retry 7 --retry-all-errors \
           "${OCIS_URL}/app/open?app_name=FakeOffice&file_id=${FILE_ID_ENC}")
         echo "open: ${OPEN:0:400}"

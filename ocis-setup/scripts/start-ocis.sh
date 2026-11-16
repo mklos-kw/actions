@@ -6,6 +6,11 @@ CONFIG_DIR="${OCIS_CONFIG_DIR_INPUT:-${HOME}/.ocis/config}"
 PID_FILE="${PID_FILE:-/tmp/ocis-wrapper.pid}"
 LOG_FILE="${LOG_FILE:-/tmp/ocis-server.log}"
 
+ADMIN_LOGIN="admin"
+ADMIN_PASSWORD="admin"
+echo "ADMIN_LOGIN=${ADMIN_LOGIN}" >> "$GITHUB_ENV"
+echo "ADMIN_PASSWORD=${ADMIN_PASSWORD}" >> "$GITHUB_ENV"
+
 REPO_ROOT="${OCIS_REPO_ROOT:-${GITHUB_WORKSPACE}}"
 FONT_PATH="${REPO_ROOT}/tests/config/ci/NotoSans.ttf"
 FONTMAP=$(mktemp /tmp/fontsMap-XXXXXX.json)
@@ -18,7 +23,7 @@ declare -A SERVER_ENV=(
   [PROXY_ENABLE_BASIC_AUTH]="true"
   [OCIS_LOG_LEVEL]="${LOG_LEVEL:-error}"
   [IDM_CREATE_DEMO_USERS]="${DEMO_USERS:-false}"
-  [IDM_ADMIN_PASSWORD]="${ADMIN_PASSWORD:-admin}"
+  [IDM_ADMIN_PASSWORD]="$ADMIN_PASSWORD"
   [FRONTEND_SEARCH_MIN_LENGTH]="2"
   [OCIS_ASYNC_UPLOADS]="true"
   [OCIS_EVENTS_ENABLE_TLS]="false"
@@ -208,8 +213,8 @@ else
   env "${ENV_ARGS[@]}" ociswrapper serve \
     --bin /usr/local/bin/ocis \
     --url "$OCIS_URL" \
-    --admin-username admin \
-    --admin-password "${ADMIN_PASSWORD:-admin}" \
+    --admin-username "$ADMIN_LOGIN" \
+    --admin-password "$ADMIN_PASSWORD" \
     --port "$WRAPPER_PORT" \
     > "$LOG_FILE" 2>&1 &
 fi
