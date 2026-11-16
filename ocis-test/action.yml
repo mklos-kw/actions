@@ -38,7 +38,7 @@ runs:
       shell: bash
       env:
         OCIS_URL: ${{ inputs.ocis-url }}
-      run: |
+      run: | # zizmor: ignore[github-env] LITMUS_SPACE_ID comes from our own oCIS test instance
         # ADMIN_LOGIN / ADMIN_PASSWORD are exported by ocis-setup
         # Get admin personal space ID
         SPACE_ID=$(curl -sk --fail -u"${ADMIN_LOGIN}:${ADMIN_PASSWORD}" "${OCIS_URL}/graph/v1.0/me/drives" \
@@ -124,7 +124,7 @@ runs:
       env:
         OCIS_URL: ${{ inputs.ocis-url }}
         SUITE: ${{ inputs.suite }}
-      run: |
+      run: | # zizmor: ignore[github-env] WOPI_* values come from our own oCIS test instance
         # ADMIN_LOGIN / ADMIN_PASSWORD are exported by ocis-setup
         # Upload test file; capture response headers for file ID
         curl -sk -u"${ADMIN_LOGIN}:${ADMIN_PASSWORD}" -X PUT \
