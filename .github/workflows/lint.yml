@@ -38,3 +38,8 @@ jobs:
 
       - name: Lint YAML
         run: yamllint .
+
+      - name: Lint shell scripts
+        # actionlint doesn't look inside a composite action's steps:, so this is
+        # the only CI coverage for the actual logic in ocis-setup/scripts/*.sh.
+        run: shellcheck ocis-setup/scripts/*.sh
